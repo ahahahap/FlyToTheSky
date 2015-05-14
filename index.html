@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>FLY TO THE SKY</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.js"></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+
+	<link rel="stylesheet" href="css/styles.css">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+  
+  <script src="js/airport_autocomplete.js"></script>
+  <script src="js/airline_autocomplete.js"></script>
+  <script>
+  	
+	$(document).ready(function() {
+		/* Autocomplete */
+		$("#departure_airport").autocomplete({
+			minLength: 2,
+			source: function (request, response) {
+		        var matches = $.map(airports, function(airport) {
+		        	if (airport.fs.toUpperCase().indexOf(request.term.toUpperCase()) === 0 || airport.name.toUpperCase().indexOf(request.term.toUpperCase()) === 0) {
+		        		return airport.fs + " - " + airport.name;
+		        	}
+		        });
+		        response(matches);
+		    }
+		});
+
+		$("#arrival_airport").autocomplete({
+			minLength: 2,
+			source: function (request, response) {
+		        var matches = $.map(airports, function(airport) {
+		        	if (airport.fs.toUpperCase().indexOf(request.term.toUpperCase()) === 0 || airport.name.toUpperCase().indexOf(request.term.toUpperCase()) === 0) {
+		        		return airport.fs + " - " + airport.name;
+		        	}
+		        });
+		        response(matches);
+		    }
+		});
+
+		$("#airline").autocomplete({
+			minLength: 2,
+			source: function (request, response) {
+		        var matches = $.map(airlines, function(airline) {
+		        	if (airline.fs.toUpperCase().indexOf(request.term.toUpperCase()) === 0 || airline.name.toUpperCase().indexOf(request.term.toUpperCase()) === 0) {
+		        		return airline.fs + " - " + airline.name;
+		        	}
+		        });
+		        response(matches);
+		    }
+		});
+
+	});
+  </script>
+
+</head>
+
+<body>
+	<div id="wrapper">
+		<div id="mainContainer" ng-app="myApp" ng-controller="myCtrl">
+			<h1>FLY TO THE SKY</h1>
+			<h2>Flight Delays and Cancellation Prediction</h2>
+			<div id="inputContainer" ng-show="!display">
+		 		<form id="flightInputForm" role="form" method="post" name="inputForm" valid-submit="submitForm()">
+		 			<div class="inputBox">
+		 				<label for="departure_date">Date of Departure</label>
+		 				<input type="date" class="form-control" ng-model="departure_date" required>
+		 			</div>
+
+		 			<div class="inputBox">
+		 				<label for="departure_airport">Departure Airport</label>
+		 				<input type="text" placeholder="Departure Airport" id="departure_airport" class="form-control" ng-model="departure_airport" required>
+		 			</div>
+
+		 			<div class="inputBox">
+		 				<label for="arrival_airport">Arrival Airport</label>
+		 				<input type="text" placeholder="Arrival Airport" id="arrival_airport" class="form-control" ng-model="arrival_airport" required>
+		 			</div>
+
+		 			<div class="inputBox">
+		 				<label for="airline">Airline</label>
+		 				<input type="text" placeholder="Airline" id="airline" class="form-control" ng-model="airline" required>
+		 			</div>
+
+		 			<div class="inputBox">
+		 				<label for="flight_num">Flight Number</label>
+		 				<input type="text" placeholder="Flight Number" class="form-control" ng-model="flight_num" required>
+		 			</div>
+		 			<button type="submit" class="btn btn-warning" id="searchButton" ng-click="doSearch()">SEARCH</button>
+		 		</form>
+		 	</div>
+
+		 	<div id="outputContainer" ng-show="display">
+		 		<div class="outputBox">
+		 			{{ departure_date | date: "yyyy-MM-dd" }}
+		 			{{ departure_airport.toUpperCase() }} &rarr; {{ arrival_airport.toUpperCase() }}
+		 			{{ airline }} {{ flight_num }}
+		 		</div>
+		 	</div>
+
+
+	 	</div>
+	 	
+
+	 	<script>
+
+	 		var app = angular.module('myApp', []);
+
+
+
+
+
+			app.controller('myCtrl', function($scope, $http) {
+				
+					$scope.departure_date;
+					$scope.departure_airport;
+					$scope.arrival_airport;
+					$scope.airline;
+					$scope.flight_num;
+
+				
+
+				$scope.lookupAirport = function(airport) {
+					for (a in airports) {
+						if (airports[a].fs.toUpperCase() == airport.toUpperCase())
+							return airports[a];
+					}
+				}
+
+				$scope.doSearch = function() {
+					$scope.departure_airport = $('#departure_airport').val().split(' - ')[0].toUpperCase();
+					$scope.arrival_airport = $('#arrival_airport').val().split(' - ')[0].toUpperCase();
+					$scope.airline = $('#airline').val().split(' - ')[0].toUpperCase();
+
+					console.log($scope.departure_airport);
+					console.log($scope.arrival_airport);
+					console.log($scope.airline);
+
+
+					if ($scope.departure_date != null && $scope.departure_airport != null && $scope.arrival_airport != null && $scope.airline != null && $scope.flight_num != null) {
+
+					
+						var departure_airport_info = $scope.lookupAirport($scope.departure_airport);
+						var arrival_airport_info = $scope.lookupAirport($scope.arrival_airport);
+
+						/* Weather Forecast: 	http://openweathermap.org/forecast */
+						var date_departure = new Date($scope.departure_date);
+						var weatherDepartureCity = departure_airport_info.city.replace(' ','+') + ',' +departure_airport_info.stateCode;
+						var weatherArrivalCity = arrival_airport_info.city.replace(' ','+') + ',' + arrival_airport_info.stateCode;
+						var weatherDepartureUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&q=" + weatherDepartureCity;
+						var weatherArrivalUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&q=" + weatherArrivalCity;
+						var dep_forecast, dep_forecast_clouds, dep_forecast_rain, dep_forecast_condition; 
+						var arr_forecast, arr_forecast_clouds, arr_forecast_rain, arr_forecast_condition; 
+
+						console.log(weatherDepartureUrl);
+						console.log(weatherArrivalUrl);
+
+						$http.get(weatherDepartureUrl).success(function(response){
+							forecast = response;
+							for (f in forecast.list) {
+								var date = new Date(forecast.list[f].dt * 1000);
+								if (date.getFullYear() == date_departure.getFullYear() && date.getMonth() == date_departure.getMonth() && date.getDate() == date_departure.getDate()) {
+									dep_forecast = forecast.list[f];
+									dep_forecast_clouds = dep_forecast.clouds || 0;
+									dep_forecast_rain = dep_forecast.rain || 0;
+									dep_forecast_condition = dep_forecast.weather[0].main;
+
+									console.log('dep_forecast_rain: ' + dep_forecast_rain);
+								}
+							}
+						}).error(function(error) {
+							console.log(JSON.stringify(error));
+						});
+
+						$http.get(weatherArrivalUrl).success(function(response){
+							forecast = response;
+							for (f in forecast.list) {
+								var date = new Date(forecast.list[f].dt * 1000);
+								if (date.getFullYear() == date_departure.getFullYear() && date.getMonth() == date_departure.getMonth() && date.getDate() == date_departure.getDate()) {
+									arr_forecast = forecast.list[f];
+									arr_forecast_clouds = arr_forecast.clouds || 0;
+									arr_forecast_rain = arr_forecast.rain || 0;
+									arr_forecast_condition = arr_forecast.weather[0].main;
+
+									console.log('arr_forecast_rain: ' + arr_forecast_rain);
+								}
+							}
+						}).error(function(error) {
+							console.log(JSON.stringify(error));
+						});
+
+						
+						
+
+
+						/* FlightStats */
+						var flightstatsId = "a2d6ef56";
+						var flightstatsKey = "73ccf56b9bd0660edff965b38f16caea";
+						
+						var appKey = '?appId=8e5aec87&appKey=ed34be983e971cafe903e442f4bf630e&callback=JSON_CALLBACK';
+
+						var routeRatingUrl = 'https://api.flightstats.com/flex/ratings/rest/v1/jsonp/route/' + $scope.departure_airport + '/' + $scope.arrival_airport + appKey;
+						var airportRatingUrl = 'https://api.flightstats.com/flex/delayindex/rest/v1/jsonp/airports/' + $scope.departure_airport + appKey;
+						var flightRatingUrl = 'https://api.flightstats.com/flex/ratings/rest/v1/jsonp/flight/' + $scope.airline + '/' + $scope.flight_num + appKey;
+
+						console.log(routeRatingUrl);
+						console.log(airportRatingUrl);
+						console.log(flightRatingUrl);
+						/* Route Rating 
+							Params: DepartureAirport, ArrivalAirport, Airline, Flightnumber 
+							Returns: On-time percentage out of 100 */
+						$http.jsonp(routeRatingUrl).success(function(response){
+							var routeRating = response.ratings;
+							for (var i = 0; i < routeRating.length; i++) {
+								var route = routeRating[i];
+								if (route.airlineFsCode == $scope.airline && route.flightNumber == $scope.flight_num) {
+									$scope.routeRating = routeRating[i].ontimePercent * 100;
+								}
+							}
+							console.log('routeRating: ' + $scope.routeRating);
+						}).error(function(error) {
+							console.log(JSON.stringify(error));
+						});
+
+						/* DO WE NEED THIS? DOESN'T ABOVE INCLUDE ALL? 
+							Airport Rating
+							Params: (Departure or Arrival) Airport
+							Returns: On-time percentage out of 100 (calculated from normalized delay score, from 0 to 5 in increments of .25 where 5 is maximum delay) */
+						$http.jsonp(airportRatingUrl).success(function(response){
+							$scope.airportRating = response.delayIndexes[0].normalizedScore;
+							$scope.airportRating = 100 - ($scope.airportRating / 5 * 100);
+							console.log('airportRating: ' + $scope.airportRating);
+						}).error(function(error) {
+							console.log(JSON.stringify(error));
+						});
+
+						$scope.display = true;
+					}
+
+
+				}
+
+
+				
+				
+
+
+
+			});
+	 	</script>
+
+	 	<!-- Moving cloud background -->
+	 	<div id="cloudBackground">
+			<div class="cloud large cloud-1">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud normal cloud-2">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud small cloud-3">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud tiny cloud-4">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud large cloud-5">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud normal cloud-6">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud small cloud-7">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud tiny cloud-8">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud small cloud-9">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud normal cloud-10">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud tiny cloud-11">
+				<div></div><div></div><div></div><div></div>
+			</div>
+			<div class="cloud small cloud-12">
+				<div></div><div></div><div></div><div></div>
+			</div>
+		</div>
+ 	</div>
+
+
+
+</body>
+</html>

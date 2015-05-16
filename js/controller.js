@@ -27,7 +27,7 @@ app.controller('myCtrl', function($scope, $http, $q) {
 	$scope.output_day_labels = []; 
 	$scope.output_day_data = [[]];
 	for (x in $scope.output_day) {
-		var day = $scope.output_month[x];
+		var day = $scope.output_day[x];
 		$scope.output_day_labels.push(day.name);
 		$scope.output_day_data[0].push(day.mean);
 	}

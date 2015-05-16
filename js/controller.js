@@ -106,16 +106,22 @@ app.controller('myCtrl', function($scope, $http, $q) {
 			// Lookup airport details; need details of the airport to forecast weather by the city and state name
 			var departure_airport_info = $scope.lookupAirport($scope.departure_airport);
 			var arrival_airport_info = $scope.lookupAirport($scope.arrival_airport);
+			var dep_city = departure_airport_info.city;
+			var dep_state = departure_airport_info.stateCode;
+			var arr_city = arrival_airport_info.city;
+			var arr_state = arrival_airport_info.stateCode;
+			$scope.dep_city = dep_city;
+			$scope.dep_state = dep_state;
+			$scope.arr_city = arr_city;
+			$scope.arr_state = arr_state;
 
 			/* Weather Forecast: 	http://openweathermap.org/forecast */
 			var jsonp = '&callback=JSON_CALLBACK';
 			var departure_date = new Date($scope.departure_date);
-			var weatherDepartureCity = departure_airport_info.city.replace(' ','+') + ',' +departure_airport_info.stateCode;
-			var weatherArrivalCity = arrival_airport_info.city.replace(' ','+') + ',' + arrival_airport_info.stateCode;
+			var weatherDepartureCity = dep_city.replace(' ','+') + ',' + dep_state;
+			var weatherArrivalCity = arr_city.replace(' ','+') + ',' + arr_state;
 			var weatherDepartureUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&units=metric&q=" + weatherDepartureCity + jsonp;
 			var weatherArrivalUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&units=metric&q=" + weatherArrivalCity + jsonp;
-			$scope.dep_city = weatherDepartureCity;
-			$scope.arr_city = weatherArrivalCity;
 			$scope.dep_forecast, $scope.dep_forecast_temp, $scope.dep_forecast_clouds, $scope.dep_forecast_rain, $scope.dep_forecast_condition; 
 			$scope.arr_forecast, $scope.arr_forecast_temp, $scope.arr_forecast_clouds, $scope.arr_forecast_rain, $scope.arr_forecast_condition; 
 

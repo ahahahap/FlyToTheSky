@@ -145,6 +145,9 @@
 			 				</div>
 			 				<div class="overall">
 			 					<label for="overall">Your flight is likely to be delayed <b>{{ ols }} minutes</b> for <b>{{ logit }}%</b> chance.</label>
+			 					<label for="weather">Weather forecast in <b>{{ dep_city }}, {{ dep_state }}</b> : {{ dep_forecast_condition }} with day temperature of {{ dep_forecast_temp }}&deg;C and chance of {{ dep_forecast_rain }}mm of precipitation. </label>
+			 					<label for="weather">Weather forecast in <b>{{ arr_city }}, {{ arr_state }}</b> : {{ arr_forecast_condition }} with day temperature of {{ arr_forecast_temp }}&deg;C and chance of {{ arr_forecast_rain }}mm of precipitation. </label>
+			 					
 			 				</div>
 			 			</section>
 
@@ -275,18 +278,6 @@
 
 
 		 		</div>
-		 		<!--Departure City Forecast
-		 		{{ dep_city }}
-		 		{{ dep_forecast, dep_forecast_clouds, dep_forecast_rain, dep_forecast_condition }}
-
-		 		Arrival City Forecast
-		 		{{ arr_city }}
-		 		{{ arr_forecast, arr_forecast_clouds, arr_forecast_rain, arr_forecast_condition }}
-
-		 		{{ dep_forecast_rain }} 
-		 		{{ arr_forecast_rain }}
-		 		{{ route_rating }}
-		 		{{ airport_rating }}-->
 		 	</div>
 	 	</div>
 

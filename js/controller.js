@@ -108,26 +108,28 @@ app.controller('myCtrl', function($scope, $http, $q) {
 			var arrival_airport_info = $scope.lookupAirport($scope.arrival_airport);
 
 			/* Weather Forecast: 	http://openweathermap.org/forecast */
+			var jsonp = '&callback=JSON_CALLBACK';
 			var departure_date = new Date($scope.departure_date);
 			var weatherDepartureCity = departure_airport_info.city.replace(' ','+') + ',' +departure_airport_info.stateCode;
 			var weatherArrivalCity = arrival_airport_info.city.replace(' ','+') + ',' + arrival_airport_info.stateCode;
-			var weatherDepartureUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&units=metric&q=" + weatherDepartureCity;
-			var weatherArrivalUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&units=metric&q=" + weatherArrivalCity;
+			var weatherDepartureUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&units=metric&q=" + weatherDepartureCity + jsonp;
+			var weatherArrivalUrl = "http://api.openweathermap.org/data/2.5/forecast/daily?mode=json&cnt=15&units=metric&q=" + weatherArrivalCity + jsonp;
 			$scope.dep_city = weatherDepartureCity;
 			$scope.arr_city = weatherArrivalCity;
 			$scope.dep_forecast, $scope.dep_forecast_temp, $scope.dep_forecast_clouds, $scope.dep_forecast_rain, $scope.dep_forecast_condition; 
 			$scope.arr_forecast, $scope.arr_forecast_temp, $scope.arr_forecast_clouds, $scope.arr_forecast_rain, $scope.arr_forecast_condition; 
 
 			/* FlightStats: 	https://developer.flightstats.com/ */
-			var appKey = '?appId=8e5aec87&appKey=ed34be983e971cafe903e442f4bf630e&callback=JSON_CALLBACK';
-			var routeRatingUrl = 'https://api.flightstats.com/flex/ratings/rest/v1/jsonp/route/' + $scope.departure_airport + '/' + $scope.arrival_airport + appKey;
-			var airportRatingUrl = 'https://api.flightstats.com/flex/delayindex/rest/v1/jsonp/airports/' + $scope.departure_airport + appKey;
+			var appKey = '?appId=8e5aec87&appKey=ed34be983e971cafe903e442f4bf630e';
+			
+			var routeRatingUrl = 'https://api.flightstats.com/flex/ratings/rest/v1/jsonp/route/' + $scope.departure_airport + '/' + $scope.arrival_airport + appKey + jsonp;
+			var airportRatingUrl = 'https://api.flightstats.com/flex/delayindex/rest/v1/jsonp/airports/' + $scope.departure_airport + appKey + jsonp;
 			$scope.route_rating = 0;
 			$scope.airport_rating = 0;
 
 			/* Prepare HTTP calls */
-			$scope.http_dep_forecast = $http.get(weatherDepartureUrl);
-			$scope.http_arr_forecast = $http.get(weatherArrivalUrl);
+			$scope.http_dep_forecast = $http.jsonp(weatherDepartureUrl);
+			$scope.http_arr_forecast = $http.jsonp(weatherArrivalUrl);
 			$scope.http_route_rating = $http.jsonp(routeRatingUrl);
 			$scope.http_airport_rating = $http.jsonp(airportRatingUrl);
 
